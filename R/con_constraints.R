@@ -1,5 +1,5 @@
 con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L, 
-                            debug = FALSE, ...) {
+                            debug = FALSE, auto_bound=FALSE,...) {
   
   ## build a bare-bones parameter table for this model
   # if model is a numeric vecter
@@ -102,6 +102,56 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
       )
     }
     
+    if(meq!=0 && auto_bound==TRUE){
+      #change parameters 
+      #     sign<-parTable$op 
+      #     a<-match("==",sign)
+      #     while (!is.na(a)) {
+      #       l<-a[1]
+      #       part1<-sign[1:(l-1)]
+      #       part2<-sign[-(1:l)]
+      #       midd<-c(">",">")
+      #       sign<-c(part1,midd,part2)
+      #      a<-match("==",sign)
+      #    } 
+      #    parTable$op<- sign
+      
+      Amat_eq<-matrix(Amat[1:meq,], nrow=meq)
+      bound<-0.75
+      prox<-SE<-c()
+      Amat_prox_2<-matrix(NA,ncol = ncol(Amat))
+      rep<-matrix()
+      for(i in 1:nrow(Amat_eq)){
+        #Calculate the Standard errors used to generate the equality bounds 
+        SE[i]<-sum(Amat_eq[i,]%*%t(Amat_eq[i,])*VCOV)
+        rep<-Amat_eq[rep(i, times = 2),]
+        Amat_prox<-rep
+        Amat_prox_2<-rbind(Amat_prox_2,Amat_prox)
+        prox[i]<-(-1)*SE[i]*bound
+      }
+      Amat_prox<-Amat_prox_2[-1,]
+      
+      ans <- seq(2,nrow(Amat_prox),2)
+      for(k in ans){
+        Amat_prox[k,]<-(-1)*Amat_prox[k,]
+      }
+      #vector of the boundry values 
+      new<-c()
+      new1<-c()
+      bvec_eq<-bvec[1:meq]
+      #repeat the values dor the rhs twice 
+      for(n in 1:meq){ 
+        prox1<-prox[rep(n, time=2)]
+        bvec_eq1<-bvec_eq[rep(n, time=2)]
+        new1<-c(new1,bvec_eq1)
+        new<-c(new,prox1)
+      }
+      rhs_eq<-new1+new
+      bvec1<-c(rhs_eq,bvec[-(1:meq)])
+      Amat<-rbind(Amat_prox,Amat[-(1:meq),])
+      meq<-0
+      bvec<-bvec1
+    }
     # In case of abs() the contraints may incorretly be considered as non-linear. 
     # Here, we remove the abs() from the constraint function which is redundant 
     # for determining if the constraints are linear. 
@@ -134,6 +184,47 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
     Amat <- constraints
     bvec <- if (is.null(bvec)) { rep(0L, nrow(Amat)) } else { bvec }
     meq  <- if (is.null(meq)) { 0L } else { meq }
+    
+    #Calculate the Standard errors used to generate the equality bounds 
+    
+    if(meq!=0 && auto_bound==TRUE){
+      Amat_eq<-matrix(Amat[1:meq,], nrow=meq)
+      bound<-0.75
+      prox<-SE<-c()
+      Amat_prox_2<-matrix(NA,ncol = ncol(Amat))
+      rep<-matrix()
+      for(i in 1:nrow(Amat_eq)){
+        SE[i]<-sum(Amat_eq[i,]%*%t(Amat_eq[i,])*VCOV)
+        rep<-Amat_eq[rep(i, times = 2),]
+        Amat_prox<-rep
+        Amat_prox_2<-rbind(Amat_prox_2,Amat_prox)
+        prox[i]<-(-1)*SE[i]*bound
+      }
+      Amat_prox<-Amat_prox_2[-1,]
+      
+      ans <- seq(2,nrow(Amat_prox),2)
+      for(k in ans){
+        Amat_prox[k,]<-(-1)*Amat_prox[k,]
+      }
+      #vector of the boundry values 
+      new<-c()
+      new1<-c()
+      bvec_eq<-bvec[1:meq]
+      #repeat the values dor the rhs twice 
+      for(n in 1:meq){ 
+        prox1<-prox[rep(n, time=2)]
+        bvec_eq1<-bvec_eq[rep(n, time=2)]
+        new1<-c(new1,bvec_eq1)
+        new<-c(new,prox1)
+      }
+      rhs_eq<-new1+new
+      bvec1<-c(rhs_eq,bvec[-(1:meq)])
+      Amat<-rbind(Amat_prox,Amat[-(1:meq),])
+      meq<-0
+      bvec<-bvec1
+    }
+    
+    
   } else { 
     stop("no restrictions were specified.") 
   }
