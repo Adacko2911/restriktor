@@ -11,7 +11,7 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
     parTable <- con_partable(model, est = TRUE, label = TRUE)  
     parTable_org <- parTable
   }
-  
+  auto_bound<-auto_bound
   # unlist constraints
   constraints <- unlist(constraints)
   
@@ -101,8 +101,9 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
           call. = FALSE
       )
     }
-    
-    if(meq!=0 && auto_bound==TRUE){
+  #implement the bounds to the equalities 
+    #if meq>0 meaning there are some equalities and auto_bound=T
+    if(meq>0 & auto_bound==TRUE){
       #change parameters 
       #     sign<-parTable$op 
       #     a<-match("==",sign)
@@ -115,9 +116,8 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
       #      a<-match("==",sign)
       #    } 
       #    parTable$op<- sign
-      
       Amat_eq<-matrix(Amat[1:meq,], nrow=meq)
-      bound<-0.75
+      bound<-2
       prox<-SE<-c()
       Amat_prox_2<-matrix(NA,ncol = ncol(Amat))
       rep<-matrix()
@@ -132,6 +132,8 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
       Amat_prox<-Amat_prox_2[-1,]
       
       ans <- seq(2,nrow(Amat_prox),2)
+      #change signs of the second row of each equality restriction to then keep the matrix in line with 
+      #Amat format before lhs > bvec for all rows 
       for(k in ans){
         Amat_prox[k,]<-(-1)*Amat_prox[k,]
       }
@@ -146,9 +148,11 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
         new1<-c(new1,bvec_eq1)
         new<-c(new,prox1)
       }
+      #bvec being the sum of previous rhs value plus the new -SE*bound 
       rhs_eq<-new1+new
       bvec1<-c(rhs_eq,bvec[-(1:meq)])
       Amat<-rbind(Amat_prox,Amat[-(1:meq),])
+      #zero the meq value 
       meq<-0
       bvec<-bvec1
     }
@@ -187,7 +191,7 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
     
     #Calculate the Standard errors used to generate the equality bounds 
     
-    if(meq!=0 && auto_bound==TRUE){
+    if(meq!=0 & auto_bound==TRUE){
       Amat_eq<-matrix(Amat[1:meq,], nrow=meq)
       bound<-0.75
       prox<-SE<-c()

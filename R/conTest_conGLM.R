@@ -3,7 +3,7 @@
 conTestF.conGLM <- function(object, type = "A", neq.alt = 0, boot = "no", R = 9999, 
                             p.distr = rnorm, parallel = "no", ncpus = 1L,
                             cl = NULL, seed = 1234, verbose = FALSE,
-                            control = NULL, ...) {
+                            control = NULL,...) {
 
   # rename for internal use
   meq.alt <- neq.alt

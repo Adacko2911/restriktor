@@ -2,7 +2,7 @@ conMLM.mlm <- function(object, constraints = NULL, se = "none",
                        B = 999, rhs = NULL, neq = 0L, mix.weights = "pmvnorm", 
                        mix.bootstrap = 99999L, parallel = "no", ncpus = 1L, cl = NULL, 
                        seed = NULL, control = list(), verbose = FALSE, 
-                       debug = FALSE, ...) {
+                       debug = FALSE,auto_bound=FALSE, ...) {
   
   # check class
   if (!(class(object)[1] == "mlm")) {
@@ -69,7 +69,8 @@ conMLM.mlm <- function(object, constraints = NULL, se = "none",
                                  constraints = Amat, 
                                  bvec        = bvec, 
                                  meq         = meq, 
-                                 debug       = debug)  
+                                 debug       = debug,
+                                 auto_bound  = auto_bound)  
     # a list with useful information about the restriktions.}
     CON <- restr.OUT$CON
     # a parameter table with information about the observed variables in the object 

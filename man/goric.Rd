@@ -12,7 +12,7 @@ comparable to the Akaike weights.
 \usage{goric(object, ...)
 
 \method{goric}{default}(object, ..., comparison = c("unconstrained", "complement", "none"), 
-      VCOV = NULL, sample.nobs = NULL, type = "goric", bound = NULL, debug = FALSE)
+      VCOV = NULL, sample.nobs = NULL, type = "goric", bound = NULL, debug = FALSE, auto_bound=FALSE)
 
 \method{print}{con_goric}(x, digits = max(3, getOption("digits") - 4), \dots)
 
@@ -60,6 +60,7 @@ comparable to the Akaike weights.
   function. }
   
   \item{bound}{not used yet.}
+  \item{auto_bound}{if TRUE, about equality is incorporated now}
   
   \item{digits}{the number of significant digits to use when printing.}
   
