@@ -6,12 +6,11 @@ goric <- function(object, ...) {
 goric.default <- function(object, ..., 
                           comparison = c("unconstrained", "complement", "none"), 
                           VCOV = NULL, sample.nobs = NULL,
-                          type = "goric", bound = NULL, debug = FALSE,auto_bound=FALSE) {
+                          type = "goric", bound = NULL, debug = FALSE) {
 
   # bounds are ignored (for now)
   bound <- NULL
-  #the logistic value of including about equality
-  auto_bound<-auto_bound
+
   
   mc <- match.call()
   CALL <- as.list(mc[-1])
@@ -26,7 +25,7 @@ goric.default <- function(object, ...,
   
   ldots <- list(...)
   arguments <- c("B", "mix.weights", "mix.bootstrap", "parallel", "ncpus", 
-                 "cl", "seed", "control", "verbose", "debug","auto_bound")
+                 "cl", "seed", "control", "verbose", "debug", "auto_bound")
   m.restr <- pmatch(names(ldots), arguments, 0L)
   if (length(m.restr) == 0L) {
     ldots2 <- ldots

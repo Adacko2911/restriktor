@@ -1,6 +1,10 @@
 con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L, 
                             debug = FALSE, auto_bound=FALSE,...) {
   
+  #-----here the an automatic bound for about equality is specified----------
+   bound<-0.5
+  #--------------------------------------------------------------------------
+  
   ## build a bare-bones parameter table for this model
   # if model is a numeric vecter
   if ("numeric" %in% class(model)) {
@@ -101,23 +105,12 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
           call. = FALSE
       )
     }
+#----------------------About equality------------------------------------------------------------------
   #implement the bounds to the equalities 
     #if meq>0 meaning there are some equalities and auto_bound=T
-    if(meq>0 & auto_bound==TRUE){
-      #change parameters 
-      #     sign<-parTable$op 
-      #     a<-match("==",sign)
-      #     while (!is.na(a)) {
-      #       l<-a[1]
-      #       part1<-sign[1:(l-1)]
-      #       part2<-sign[-(1:l)]
-      #       midd<-c(">",">")
-      #       sign<-c(part1,midd,part2)
-      #      a<-match("==",sign)
-      #    } 
-      #    parTable$op<- sign
+    if(meq>0 & auto_bound==TRUE ){
       Amat_eq<-matrix(Amat[1:meq,], nrow=meq)
-      bound<-2
+      bound<-bound
       prox<-SE<-c()
       Amat_prox_2<-matrix(NA,ncol = ncol(Amat))
       rep<-matrix()
@@ -193,7 +186,7 @@ con_constraints <- function(model, VCOV, est, constraints, bvec = NULL, meq = 0L
     
     if(meq!=0 & auto_bound==TRUE){
       Amat_eq<-matrix(Amat[1:meq,], nrow=meq)
-      bound<-0.75
+      bound<-bound
       prox<-SE<-c()
       Amat_prox_2<-matrix(NA,ncol = ncol(Amat))
       rep<-matrix()
